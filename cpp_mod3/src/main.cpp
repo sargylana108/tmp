@@ -1,25 +1,25 @@
 #include <Arduino.h>
 #include <string>
-#include <array> // Ипользуем std::array, так как по уловию знаем размер массива
+#include <array>  // Ипользуем std::array, так как по уловию знаем размер массива
 
 #define LED_PIN 39
-#define COMMAND_HISTORY_SIZE 4  // Количество последних команд для хранения
 
 // мощность свечения
 int power = 4096;
 
-// буффер для приема сообщений
+// буфер для приема сообщений
 std::string message = "";
 
-// Массив для хранения последних команд
-std::array<std::string, COMMAND_HISTORY_SIZE> commandHistory = {"", "", "", ""};
+// Массив для хранения последних 4 команд
+std::array<std::string, 4> commandHistory = {"", "", "", ""};
 unsigned long lastCommandPrintTime = 0;  // Время последнего вывода команд
-const unsigned long commandPrintInterval = 20000;  // Интервал вывода команд в миллисекундах
+const unsigned long commandPrintInterval = 20000;  // Интервал вывода команд в миллисекундах (20 секунд)
 
 bool light_on = false;
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
+  pinMode(18, INPUT);
 
   Serial.begin(115200);
 }
@@ -31,13 +31,13 @@ void loop() {
 
     while (Serial.available() > 0) {
       message += std::string(1, char(Serial.read()));
-      delay(500);  // Пауза между чтением байтов
+      delay(500);
     }
-    
+
     power = std::stoi(message);
 
-    // Сохраняем команду в массиве последних команд
-    for (int i = COMMAND_HISTORY_SIZE - 1; i > 0; --i) {
+    // Сохраняем команду в массив последних команд
+    for (int i = 3; i > 0; --i) {
       commandHistory[i] = commandHistory[i - 1];  // Сдвигаем предыдущие команды
     }
     commandHistory[0] = message;  // Добавляем новую команду в начало
@@ -46,16 +46,15 @@ void loop() {
     Serial.println(power);
   }
 
-  // Проверяем, прошло ли 20 секунд с последнего вывода
+  // Проверяем, прошло ли 20 секунд с последнего вывода команд
   if (millis() - lastCommandPrintTime >= commandPrintInterval) {
-    // Логика для вывода последних команд без отдельной функции
+    // Выводим последние 4 команды
     Serial.println("Last 4 commands:");
-    for (int i = 0; i < COMMAND_HISTORY_SIZE; ++i) {
+    for (int i = 0; i < 4; ++i) {
       Serial.print(i + 1);
       Serial.print(": ");
       Serial.println(commandHistory[i].c_str());
     }
-
     lastCommandPrintTime = millis();  // Обновляем время последнего вывода
   }
 
