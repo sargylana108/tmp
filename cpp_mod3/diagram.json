@@ -66,5 +66,10 @@
     [ "r2:1", "led1:A", "green", [ "v0" ] ],
     [ "esp:GND.4", "led1:C", "black", [ "h0" ] ]
   ],
+  "serialMonitor": {
+    "display": "terminal",
+    "newline": "lf",
+    "convertEOL": false
+  },
   "dependencies": {}
 }
